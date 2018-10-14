@@ -1,0 +1,45 @@
+% This code is for implementing RT 
+% Radiation therapy first and then Chemotherapy 
+
+close all;
+clear all;
+clc;
+
+% This code is for Radiation Therapy
+
+t_final = 40;
+D = 0:1:60;
+t = 1:0.001:t_final;
+
+x = zeros(length(t),length(D)*2);
+
+for i = 1:length(D)
+    i
+    x(:,2*i-1:2*i) = ode4(@sys_ndRad,t,[1;0],D(i)); 
+    
+    PMCells_after_Saturation(i) = x(end,2*i);
+    ERR_thyroid(i) = x(end,2*i)*1.55;  %  
+end
+
+Ncells_EndofRad = x(end,1*i);
+PMcells_EndofRad = x(end,2*i);
+
+figure(1)
+hold on
+plot(D,ERR_thyroid)
+
+%------- Thyroid ERR data due to HL from Shuryak--------% 
+
+Data = load('ThyERRHLSachs.txt');
+scatter(Data(:,1),Data(:,2))
+
+
+%--------LQ model------------
+
+alpha1 = 0.017;
+beta1 = 4.5*alpha1;
+alpha2 = 0.25;
+beta2 = 4*alpha2;
+ERR = (alpha1.*D-beta1.*((D.^2)/20)).*exp(-alpha2*D.^2);
+plot(D,ERR*275)
+hold off;
